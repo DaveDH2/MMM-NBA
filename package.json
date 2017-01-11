@@ -1,0 +1,22 @@
+{
+  "name": "mmm-nba",
+  "version": "1.0.0",
+  "description": "National BasketBall League Module for MagicMirror2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaveDH2/MMM-NBA.git"
+  },
+  "keywords": [
+    "MagicMirror",
+    "NBA"
+  ],
+  "author": "DaveDH2",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DaveDH2/MMM-NBA/issues"
+  },
+  "homepage": "https://github.com/DaveDH2/MMM-NBA#readme",
+  "dependencies": {
+    "request": "^2.74.0"
+  }
+}

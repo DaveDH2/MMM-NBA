@@ -1,0 +1,86 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'i',
+1 verbose cli   'node_helper' ]
+2 info using npm@3.3.12
+3 info using node@v5.4.1
+4 verbose config Skipping project config: /Users/dtrinh/.npmrc. (matches userconfig)
+5 silly loadCurrentTree Starting
+6 silly install loadCurrentTree
+7 silly install readLocalPackageData
+8 silly fetchPackageMetaData node_helper
+9 silly fetchNamedPackageData node_helper
+10 silly mapToRegistry name node_helper
+11 silly mapToRegistry using default registry
+12 silly mapToRegistry registry https://npm.apple.com/
+13 silly mapToRegistry uri https://npm.apple.com/node_helper
+14 verbose request uri https://npm.apple.com/node_helper
+15 verbose request no auth needed
+16 info attempt registry request try #1 at 11:58:05 AM
+17 verbose request id a538df0e83d8a3cf
+18 http request GET https://npm.apple.com/node_helper
+19 http 404 https://npm.apple.com/node_helper
+20 verbose headers { server: 'nginx/1.10.1',
+20 verbose headers   date: 'Tue, 10 Jan 2017 19:58:05 GMT',
+20 verbose headers   'content-type': 'application/json',
+20 verbose headers   'transfer-encoding': 'chunked',
+20 verbose headers   connection: 'keep-alive',
+20 verbose headers   'x-artifactory-id': '8a2176306814e51da0109278804e3b9a32e6824f',
+20 verbose headers   'x-artifactory-node-id': 'mr11b00is-hpba01143701.isg.apple.com',
+20 verbose headers   'content-encoding': 'gzip',
+20 verbose headers   'x-proxy-cache-status': 'MISS',
+20 verbose headers   'x-proxy-node-id': 'a204640.mr.iso.apple.com' }
+21 silly get cb [ 404,
+21 silly get   { server: 'nginx/1.10.1',
+21 silly get     date: 'Tue, 10 Jan 2017 19:58:05 GMT',
+21 silly get     'content-type': 'application/json',
+21 silly get     'transfer-encoding': 'chunked',
+21 silly get     connection: 'keep-alive',
+21 silly get     'x-artifactory-id': '8a2176306814e51da0109278804e3b9a32e6824f',
+21 silly get     'x-artifactory-node-id': 'mr11b00is-hpba01143701.isg.apple.com',
+21 silly get     'content-encoding': 'gzip',
+21 silly get     'x-proxy-cache-status': 'MISS',
+21 silly get     'x-proxy-node-id': 'a204640.mr.iso.apple.com' } ]
+22 silly fetchPackageMetaData Error: 404 Not Found: node_helper
+22 silly fetchPackageMetaData     at makeError (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+22 silly fetchPackageMetaData     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:250:14)
+22 silly fetchPackageMetaData     at /usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:178:7
+22 silly fetchPackageMetaData     at Gunzip.onEnd (zlib.js:227:5)
+22 silly fetchPackageMetaData     at emitNone (events.js:72:20)
+22 silly fetchPackageMetaData     at Gunzip.emit (events.js:166:7)
+22 silly fetchPackageMetaData     at endReadableNT (_stream_readable.js:905:12)
+22 silly fetchPackageMetaData     at nextTickCallbackWith2Args (node.js:474:9)
+22 silly fetchPackageMetaData     at process._tickCallback (node.js:388:17)
+22 silly fetchPackageMetaData  error for node_helper { [Error: 404 Not Found: node_helper] pkgid: 'node_helper', statusCode: 404, code: 'E404' }
+23 silly rollbackFailedOptional Starting
+24 silly rollbackFailedOptional Finishing
+25 silly runTopLevelLifecycles Starting
+26 silly runTopLevelLifecycles Finishing
+27 silly install printInstalled
+28 verbose stack Error: 404 Not Found: node_helper
+28 verbose stack     at makeError (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+28 verbose stack     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:250:14)
+28 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:178:7
+28 verbose stack     at Gunzip.onEnd (zlib.js:227:5)
+28 verbose stack     at emitNone (events.js:72:20)
+28 verbose stack     at Gunzip.emit (events.js:166:7)
+28 verbose stack     at endReadableNT (_stream_readable.js:905:12)
+28 verbose stack     at nextTickCallbackWith2Args (node.js:474:9)
+28 verbose stack     at process._tickCallback (node.js:388:17)
+29 verbose statusCode 404
+30 verbose pkgid node_helper
+31 verbose cwd /Users/dtrinh/Forge/MMM-NBA
+32 error Darwin 15.5.0
+33 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "i" "node_helper"
+34 error node v5.4.1
+35 error npm  v3.3.12
+36 error code E404
+37 error 404 Not Found: node_helper
+37 error 404
+37 error 404 'node_helper' is not in the npm registry.
+37 error 404 You should bug the author to publish it (or use the name yourself!)
+37 error 404
+37 error 404 Note that you can also install from a
+37 error 404 tarball, folder, http url, or git url.
+38 verbose exit [ 1, true ]
