@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/DaveDH2/MMM-NBA#readme",
   "dependencies": {
-    "request": "^2.74.0"
+    "axios": "*",
+    "lodash": "*"
   }
 }
