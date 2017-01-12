@@ -3,64 +3,6 @@ var moment = require('moment');
 var _ = require('lodash');
 var NodeHelper = require('node_helper');
 
-function getNBASchedule() {
-  return axios.get('http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json')
-    .then(function(data){
-      return data.data.lscd;
-    });
-}
-
-function filterByMonth(month, data) {
-  for (var i = 0; i <= data.length; i++) {
-    if (data[i].mscd.mon === month){
-      currentScheduleMonth = data.slice(i,data.length);
-      return currentScheduleMonth;
-    }
-  }
-}
-
-var getDataFromNBA = function() {
-  return getNBASchedule().then(function(payload) {
-      var currentMonth = moment().format('MMMM');
-      return filterByMonth(currentMonth, payload);
-  }).then(function(result) {
-      return result
-  });
-}
-
-var getMonthlySchedule = function(data, month, teamId){
-
-  var dataSet = [];
-
-  for (var k = 0; k < data.length; k++) {
-     if (data[k].mscd.mon === month) {
-       var currentMonthlySchedule = data[k].mscd.g;
-       for (var i = 0; i < currentMonthlySchedule.length; i++) {
-          if (currentMonthlySchedule[i].v.tid === teamId || currentMonthlySchedule[i].h.tid === teamId) {
-           dataSet.push(currentMonthlySchedule[i]);
-          }
-       }
-     }
-  }
-
-  return dataSet;
-};
-
-var getTeamSchedule = function(teamId) {
-  return getDataFromNBA().then(function(payload) {
-    return getMonthlySchedule(payload, month, teamId)
-  })
-};
-
-var monthlyScheduleResults = function(teamId) {
-  return getTeamSchedule(teamId).then(function(r) {
-    console.log("result of monthlyResults", r, r.length)
-    return r
-  });
-};
-
-monthlyScheduleResults(1610612744);
-
 module.exports = NodeHelper.create({
 
   url: "http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json",
@@ -97,8 +39,6 @@ module.exports = NodeHelper.create({
   },
 
   getData: function() {
-    var axios = require('axios');
-    var _ = require('lodash');
 
     function checkResponseStatus(res) {
       if (res.status !== 200) {
@@ -116,14 +56,33 @@ module.exports = NodeHelper.create({
 
     }
 
-    function getTeamsCurrentRecord() {
+    var now = moment().format('YYYY MM DD');
+    var date = now.replace(/\s+/g, '-');
 
+    function filteredTeamCurrentRecord(payload, teamId) {
+      var lastGameObject = _.last(payload)
+
+      if (teamId === lastGameObject.v.tid) {
+        return lastGameObject.v.re
+      } else {
+        return lastGameObject.h.re
+      }
+    }
+
+    function filteredTeamNextGamesFromCurrentDate(schedule, date) {
+      var scheduleFromCurrentDate = [];
+      for (var i = 0; i < schedule.length; i++) {
+        if (moment(date).isSameOrBefore(schedule[i].gdte)) {
+          scheduleFromCurrentDate.push(schedule[i])
+        }
+      }
+
+      return scheduleFromCurrentDate;
     }
 
     function getCurrentSchedule(data) {
       var schedule = []
       for (var mscdObj = 0; mscdObj < data.length; mscdObj++) {
-          //schedule.push(data[mscdObj].mscd.g)
         var gameSchedule = data[mscdObj].mscd.g;
         for (var gameObj = 0; gameObj < gameSchedule.length; gameObj++) {
           schedule.push(gameSchedule[gameObj])
@@ -136,24 +95,24 @@ module.exports = NodeHelper.create({
       var teamSchedule = [];
 
       _.filter(schedule, function(fSch) {
-        teamSchedule.push(fSch.v.tid === teamId || fSch.h.tid === teamId)
-      })
+        if (fSch.v.tid === teamId || fSch.h.tid === teamId) {
+              teamSchedule.push(fSch)
+        }
+      });
 
       return teamSchedule;
     }
 
-    function getTeamSchedule(result) {
-      console.log(result)
+    function getResults(result) {
       return result;
     }
 
 
-    var getData = function(url, teamId) {
+    var getData = function(url) {
       return axios.get(url)
       .then(checkResponseStatus)
       .then(massageResponseData)
       .then(getCurrentSchedule)
-      .then(getTeamSchedule)
       .catch(function(error) {
         if (error.response) {
           console.log(error.response.data)
@@ -164,5 +123,31 @@ module.exports = NodeHelper.create({
       });
     }
 
-    getData('http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json', 1610612744);
+    var getFilteredTeamSchedule = function(teamId) {
+      var getScheduleFromApi = getData('http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json');
+      return getScheduleFromApi.then(function(payload) {
+        return filterForTeamSchedule(payload, teamId)
+      })
+    };
+
+    var filteredTeamSchedule = getFilteredTeamSchedule(1610612744).then(getResults);
+
+    var currentTeamRecord = filteredTeamSchedule.then(function(res){
+      return filteredTeamCurrentRecord(res, 1610612744)
+    });
+
+    var currentScheduleFromDate = filteredTeamSchedule.then(function(res) {
+      var now = moment().format('YYYY MM DD');
+      var date = now.replace(/\s+/g, '-');
+      return filteredTeamNextGamesFromCurrentDate(res, date)
+    });
+
+    var nextSixGames = currentScheduleFromDate.then(function(teamScheduleFromTodayDate) {
+      return teamScheduleFromTodayDate.splice(0,6)
+    });
+
+    nextSixGames.then(function(res) {
+      console.log(res)
+    })
+  }
 });
