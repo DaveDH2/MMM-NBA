@@ -39,115 +39,63 @@ module.exports = NodeHelper.create({
   },
 
   getData: function() {
+    var utils = require('./utilities.js')
+    var _ = require('lodash');
+    var moment = require('moment');
 
-    function checkResponseStatus(res) {
-      if (res.status !== 200) {
-        throw new Error(res);
+    var teamID = 1610612744;
+    var URL = "http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json"
+
+    var getData = function(url, teamId) {
+      return utils.teamSchedule(url, teamId);
+    }
+
+    var object = {
+      'schedule': [],
+      'record': {
+        'tRecord': null,
+        'oRecord': null
+      },
+      'nextMatch': null,
+      'live': {
+        'state': false,
+        'gameTime': null
+      }
+    }
+
+    getData(URL, teamID).then(function(data) {
+      var nextScheduledGames = utils.currentScheduleFromDate(data).splice(0,6);
+      var firstGame = _.head(nextScheduledGames);
+
+      var now = moment().format('LLLL');
+      var gameTimeVar = firstGame.etm
+      var gameTime = moment(gameTimeVar).format('LLLL')
+
+
+      object.schedule = nextScheduledGames;
+      object.live.gameTime = firstGame.etm;
+
+      if (1610612744 === firstGame.h.tid) {
+        object.record.tRecord = firstGame.h.re;
+        object.record.oRecord = firstGame.v.re;
+
       } else {
-        return res;
-      }
-    }
-
-    function massageResponseData(data) {
-      return data.data.lscd;
-    }
-
-    function getCurrentMonth() {
-
-    }
-
-    var now = moment().format('YYYY MM DD');
-    var date = now.replace(/\s+/g, '-');
-
-    function filteredTeamCurrentRecord(payload, teamId) {
-      var lastGameObject = _.last(payload)
-
-      if (teamId === lastGameObject.v.tid) {
-        return lastGameObject.v.re
-      } else {
-        return lastGameObject.h.re
-      }
-    }
-
-    function filteredTeamNextGamesFromCurrentDate(schedule, date) {
-      var scheduleFromCurrentDate = [];
-      for (var i = 0; i < schedule.length; i++) {
-        if (moment(date).isSameOrBefore(schedule[i].gdte)) {
-          scheduleFromCurrentDate.push(schedule[i])
-        }
+        object.record.tRecord = firstGame.v.re;
+        object.record.oRecord = firstGame.h.re;
       }
 
-      return scheduleFromCurrentDate;
-    }
-
-    function getCurrentSchedule(data) {
-      var schedule = []
-      for (var mscdObj = 0; mscdObj < data.length; mscdObj++) {
-        var gameSchedule = data[mscdObj].mscd.g;
-        for (var gameObj = 0; gameObj < gameSchedule.length; gameObj++) {
-          schedule.push(gameSchedule[gameObj])
-        }
-      }
-      return schedule;
-    }
-
-    function filterForTeamSchedule(schedule, teamId) {
-      var teamSchedule = [];
-
-      _.filter(schedule, function(fSch) {
-        if (fSch.v.tid === teamId || fSch.h.tid === teamId) {
-              teamSchedule.push(fSch)
-        }
-      });
-
-      return teamSchedule;
-    }
-
-    function getResults(result) {
-      return result;
-    }
-
-
-    var getData = function(url) {
-      return axios.get(url)
-      .then(checkResponseStatus)
-      .then(massageResponseData)
-      .then(getCurrentSchedule)
-      .catch(function(error) {
-        if (error.response) {
-          console.log(error.response.data)
-          console.log(error.response.status)
+      if (object.live.state !== true) {
+        if (_.nth(nextScheduledGames, 0).v.tid !== 1610612744) {
+          object.nextMatch = _.nth(nextScheduledGames, 0).v.tn
         } else {
-          console.log("Error with getData", error.message)
+          object.nextMatch = _.nth(nextScheduledGames, 0).h.tn
         }
-      });
-    }
+      }
 
-    var getFilteredTeamSchedule = function(teamId) {
-      var getScheduleFromApi = getData('http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json');
-      return getScheduleFromApi.then(function(payload) {
-        return filterForTeamSchedule(payload, teamId)
-      })
-    };
+      if (moment(gameTime).isSame(now)) {
+        object.live.state = true;
+      }
 
-    var filteredTeamSchedule = getFilteredTeamSchedule(1610612744).then(getResults);
-
-    var currentTeamRecord = filteredTeamSchedule.then(function(res){
-      return filteredTeamCurrentRecord(res, 1610612744)
     });
-
-    var currentScheduleFromDate = filteredTeamSchedule.then(function(res) {
-      var now = moment().format('YYYY MM DD');
-      var date = now.replace(/\s+/g, '-');
-      return filteredTeamNextGamesFromCurrentDate(res, date)
-    });
-
-    var nextSixGames = currentScheduleFromDate.then(function(teamScheduleFromTodayDate) {
-      return teamScheduleFromTodayDate.splice(0,6)
-    });
-
-    nextSixGames.then(function(res) {
-      console.log(res)
-    })
   }
 });
