@@ -26,7 +26,8 @@ Module.register("MMM-NBA", {
   defaults: {
     colored: false,
     matches: 6,
-    format: "ddd h:mm"
+    format: "ddd h:mm",
+    reloadInterval: 30 * 60 * 1000
   },
 
   getScripts: function() {
@@ -45,7 +46,8 @@ Module.register("MMM-NBA", {
   socketNotificationReceived: function(notification, payload) {
     if (notification === "SCORE") {
       this.scores = payload.scores;
-      this.details = payload.details;
+      console.log("this.scores" + this.scores)
+      this.updateDom(300);
     }
   },
 
@@ -56,28 +58,32 @@ Module.register("MMM-NBA", {
     header.innerHTML = "NBA " + this.mode[this.details.t] + " " + this.details.y;
     scores.appendChild(header);
 
+    console.log("yooyoyoyoyyoyoy", this.scores)
+
+
     if (!this.scores) {
       var text = document.createElement("div");
       text.innerHTML = "LOADING";
       text.classList.add("dimmed", "light");
       scores.appendChild(text)
-    } else {
-      var table = document.createElement("table");
-      table.classList.add("small", "table");
-
-      table.appendChild(this.createLableRow());
-
-      var max = 6;
-
-      for (var i = 0; i < max; i++) {
-        this.appendDataRow(this.scores[i], table);
-      }
-
-      scores.appendChild(table);
     }
-
+    //else {
+    //   var table = document.createElement("table");
+    //   table.classList.add("small", "table");
+    //
+    //   table.appendChild(this.createLableRow());
+    //
+    //   var max = 6;
+    //
+    //   for (var i = 0; i < max; i++) {
+    //     this.appendDataRow(this.scores[i], table);
+    //   }
+    //
+    //   scores.appendChild(table);
+    // }
+    //
     wrapper.appendChild(scores);
-
+    //
     return wrapper;
   },
 

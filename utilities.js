@@ -104,5 +104,9 @@ var utilities = module.exports = {
       var now = moment().format('YYYY MM DD');
       var date = now.replace(/\s+/g, '-');
       return utilities.filteredTeamNextGamesFromCurrentDate(payload, date)
+  },
+
+  getData: function(url, teamId) {
+    return utilities.teamSchedule(url, teamId);
   }
 };

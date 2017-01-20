@@ -1,18 +1,31 @@
 var axios = require('axios');
 var moment = require('moment');
 var _ = require('lodash');
+var utils = require('./utilities.js')
 var NodeHelper = require('node_helper');
+
+
 
 module.exports = NodeHelper.create({
 
   url: "http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json",
-  scores: [],
+  teamID: 1610612744,
+  score: {
+    tScore: null,
+    oScore: null
+  },
   details: {},
-  nextMatch: null,
+  schedule : [],
+  record : {
+    tRecord : null,
+    oRecord : null
+  },
+  nextMatch : null,
   live: {
     state: false,
-    matches: []
+    gameTime : null
   },
+
 
   start: function() {
     console.log("Starting Module: " + this.name);
@@ -39,63 +52,48 @@ module.exports = NodeHelper.create({
   },
 
   getData: function() {
-    var utils = require('./utilities.js')
-    var _ = require('lodash');
-    var moment = require('moment');
 
-    var teamID = 1610612744;
-    var URL = "http://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2016/league/00_full_schedule.json"
-
-    var getData = function(url, teamId) {
-      return utils.teamSchedule(url, teamId);
-    }
-
-    var object = {
-      'schedule': [],
-      'record': {
-        'tRecord': null,
-        'oRecord': null
-      },
-      'nextMatch': null,
-      'live': {
-        'state': false,
-        'gameTime': null
-      }
-    }
-
-    getData(URL, teamID).then(function(data) {
+    utils.getData(this.url, this.teamID).then(function(data) {
       var nextScheduledGames = utils.currentScheduleFromDate(data).splice(0,6);
       var firstGame = _.head(nextScheduledGames);
 
       var now = moment().format('LLLL');
-      var gameTimeVar = firstGame.etm
+      var gameTimeVar = firstGame.etm;
       var gameTime = moment(gameTimeVar).format('LLLL')
 
 
-      object.schedule = nextScheduledGames;
-      object.live.gameTime = firstGame.etm;
+      this.schedule = nextScheduledGames;
+      this.live.gameTime = firstGame.etm;
 
-      if (1610612744 === firstGame.h.tid) {
-        object.record.tRecord = firstGame.h.re;
-        object.record.oRecord = firstGame.v.re;
+      if (this.teamID === firstGame.h.tid) {
+        this.record.tRecord = firstGame.h.re;
+        this.score.tScore = firstGame.h.s
+        this.record.oRecord = firstGame.v.re;
+        this.score.oScore = firstGame.v.s
 
       } else {
-        object.record.tRecord = firstGame.v.re;
-        object.record.oRecord = firstGame.h.re;
+        this.record.tRecord = firstGame.v.re;
+        this.score.tScore = firstGame.v.s
+        this.record.oRecord = firstGame.h.re;
+        this.score.oScore = firstGame.h.s
       }
 
-      if (object.live.state !== true) {
-        if (_.nth(nextScheduledGames, 0).v.tid !== 1610612744) {
-          object.nextMatch = _.nth(nextScheduledGames, 0).v.tn
+      if (this.live.state !== true) {
+        if (_.nth(nextScheduledGames, 0).v.tid !== this.teamID) {
+          this.nextMatch = _.nth(nextScheduledGames, 0).v.tn
         } else {
-          object.nextMatch = _.nth(nextScheduledGames, 0).h.tn
+          this.nextMatch = _.nth(nextScheduledGames, 0).h.tn
         }
       }
 
       if (moment(gameTime).isSame(now)) {
-        object.live.state = true;
+        this.live.state = true;
       }
 
+      this.sendSocketNotification("SCORES", {tScore: this.scores.tScore, oScore: this.scores.oScore});
+
+      return;
     });
+
   }
 });
